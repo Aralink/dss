@@ -135,8 +135,8 @@ public abstract class ExtensionBuilder extends XAdESBuilder {
 
 			signedDataObjectPropertiesDom = (Element) signedDataObjectPropertiesNodeList.item(0);
 		} else if (length == 0) {
-
-			signedDataObjectPropertiesDom = DSSXMLUtils.addElement(documentDom, signedPropertiesDom, XAdESNamespaces.XAdES, "xades:SignedDataObjectProperties");
+			//@PFB modificado. Comentado
+			//signedDataObjectPropertiesDom = DSSXMLUtils.addElement(documentDom, signedPropertiesDom, XAdESNamespaces.XAdES, "xades:SignedDataObjectProperties");
 		} else {
 
 			throw new DSSException("The signature contains more than one SignedDataObjectProperties element! Extension is not possible.");

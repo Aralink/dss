@@ -24,14 +24,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.europa.esig.dss.DSSException;
 import eu.europa.esig.dss.DSSUtils;
 import eu.europa.esig.dss.TSLConstant;
 import eu.europa.esig.dss.XmlDom;
-import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.policy.CertificateExpirationConstraint;
 import eu.europa.esig.dss.validation.policy.Constraint;
 import eu.europa.esig.dss.validation.policy.ProcessParameters;
@@ -54,7 +51,7 @@ import eu.europa.esig.dss.x509.CertificateSourceType;
 import eu.europa.esig.dss.x509.crl.CRLReasonEnum;
 
 public class X509CertificateValidation {
-	private static final Logger LOG = LoggerFactory.getLogger(X509CertificateValidation.class);
+
 	/**
 	 * The following variables are used only in order to simplify the writing of the rules!
 	 */
@@ -827,9 +824,7 @@ public class X509CertificateValidation {
 	 * @param certificateXmlDom @return
 	 */
 	private boolean checkSigningCertificateTSLStatusAndValidityConstraint(final Conclusion conclusion, String certificateId, final XmlDom certificateXmlDom) {
-		//System.out.println("----------checkSigningCertificateTSLStatusAndValidityConstraint-----------");
-		//System.err.println("----------checkSigningCertificateTSLStatusAndValidityConstraint-----------");
-		//LOG.info("----------checkSigningCertificateTSLStatusAndValidityConstraint-----------");
+
 		final String trustedSource = certificateXmlDom.getValue("./CertificateChain/ChainCertificate[last()]/Source/text()");
 		if (CertificateSourceType.TRUSTED_STORE.name().equals(trustedSource)) {
 			return true;
@@ -846,24 +841,19 @@ public class X509CertificateValidation {
 		final List<XmlDom> tspList = certificateXmlDom.getElements("./TrustedServiceProvider");
 		boolean found = false;
 		for (final XmlDom trustedServiceProviderXmlDom : tspList) {
-			final String serviceServiceName = trustedServiceProviderXmlDom.getValue("./TSPServiceName/text()");
+
 			final String serviceTypeIdentifier = trustedServiceProviderXmlDom.getValue("./TSPServiceType/text()");
-			LOG.info("    TSP serviceTypeName: "+serviceServiceName+" serviceTypeIdentifier:"+serviceTypeIdentifier);
 			if (!TSLConstant.CA_QC.equals(serviceTypeIdentifier)) {
 				continue;
 			}
 			final Date statusStartDate = trustedServiceProviderXmlDom.getTimeValueOrNull("./StartDate/text()");
 			final Date statusEndDate = trustedServiceProviderXmlDom.getTimeValueOrNull("./EndDate/text()");
-			LOG.info("    TSP start: "+statusStartDate+" end:"+statusEndDate);
 			if (certificateValidFrom.after(statusStartDate) && ((statusEndDate == null) || certificateValidFrom.before(statusEndDate))) {
-				LOG.info("    TSP certificateValid after TSP statusStartDate");
 
 				final String status = trustedServiceProviderXmlDom == null ? "" : trustedServiceProviderXmlDom.getValue("./Status/text()");
 				found = TSLConstant.SERVICE_STATUS_UNDERSUPERVISION.equals(status) || TSLConstant.SERVICE_STATUS_SUPERVISIONINCESSATION.equals(status) || TSLConstant.SERVICE_STATUS_ACCREDITED
 						.equals(status) || TSLConstant.SERVICE_STATUS_UNDERSUPERVISION_119612.equals(status) || TSLConstant.SERVICE_STATUS_SUPERVISIONINCESSATION_119612
 						.equals(status) || TSLConstant.SERVICE_STATUS_ACCREDITED_119612.equals(status);
-				LOG.info("    TSP status: "+status + " found: ----->>>>>"+found);
-
 				if (found) {
 					break;
 				}
@@ -874,7 +864,7 @@ public class X509CertificateValidation {
 		constraint.setIndications(Indication.INDETERMINATE, SubIndication.TRY_LATER, MessageTag.CTS_ITACBT_ANS);
 		constraint.setAttribute(AttributeValue.CERTIFICATE_ID, certificateId);
 		constraint.setConclusionReceiver(conclusion);
-		LOG.info("----------checkSigningCertificateTSLStatusAndValidityConstraint END-----------");
+
 		return constraint.check();
 	}
 

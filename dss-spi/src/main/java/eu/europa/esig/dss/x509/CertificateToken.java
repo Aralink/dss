@@ -151,7 +151,7 @@ public class CertificateToken extends Token {
 	 */
 	public CertificateToken(X509Certificate x509Certificate) {
 		if (x509Certificate == null) {
-			throw new NullPointerException("X509 certificate is missing");
+			throw new DSSException("X509 certificate is missing");
 		}
 
 		this.x509Certificate = x509Certificate;

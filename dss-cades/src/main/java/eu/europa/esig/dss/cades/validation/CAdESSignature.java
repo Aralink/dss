@@ -1231,7 +1231,7 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 					// org.bouncycastle.operator.RuntimeOperatorException.
 					LOG.warn(e.getMessage(), e);
 				} catch (CMSSignerDigestMismatchException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error(e.getMessage()); // [20170921 JCMH] QUITO ESTE STACK TRACE PARA EVITAR EL LLENADO DE LOS LOGS        , e);
 					signatureCryptographicVerification.setErrorMessage(e.getMessage());
 				} catch (OperatorCreationException e) {
 					LOG.error(e.getMessage(), e);
@@ -1526,7 +1526,7 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 			final ByteArrayOutputStream data = new ByteArrayOutputStream();
 			data.write(signerInformation.getSignature());
 			// We don't include the outer SEQUENCE, only the attrType and
-			// attrValues as stated by the TS Ã‚Â§6.3.5, NOTE 2
+			// attrValues as stated by the TS Â§6.3.5, NOTE 2
 			final AttributeTable unsignedAttributes = signerInformation.getUnsignedAttributes();
 			if (unsignedAttributes != null) {
 
@@ -1638,11 +1638,11 @@ public class CAdESSignature extends DefaultAdvancedSignature {
 	/**
 	 * This method handles the archive-timestamp-v2
 	 * The value of the messageImprint field within TimeStampToken shall be a
-	 * hash of the concatenation of: â€¢ the encapContentInfo element of the
-	 * SignedData sequence; â€¢ any external content being protected by the
-	 * signature, if the eContent element of the encapContentInfo is omitted; â€¢
+	 * hash of the concatenation of: • the encapContentInfo element of the
+	 * SignedData sequence; • any external content being protected by the
+	 * signature, if the eContent element of the encapContentInfo is omitted; •
 	 * the Certificates and crls elements of the SignedData sequence, when
-	 * present; and â€¢ all data elements in the SignerInfo sequence including all
+	 * present; and • all data elements in the SignerInfo sequence including all
 	 * signed and unsigned attributes.
 	 * NOTE 1: An alternative archiveTimestamp attribute, identified by an
 	 * object identifier { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1)

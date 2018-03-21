@@ -42,6 +42,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.qualified.ETSIQCObjectIdentifiers;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -469,6 +470,9 @@ public abstract class SignedDocumentValidator implements DocumentValidator {
 		validationContext.initialize(certificateVerifier);
 
 		validationContext.setCurrentTime(provideProcessExecutorInstance().getCurrentTime());
+		//LocalDate localDate = new LocalDate(2021, 2, 2);
+		//Date date = localDate.toDate();
+		//validationContext.setCurrentTime(date);
 		validationContext.validate();
 
 		// For each validated signature present in the document to be validated the extraction of diagnostic data is launched.
@@ -790,7 +794,7 @@ public abstract class SignedDocumentValidator implements DocumentValidator {
 	/**
 	 * This method deals with the Qualified Certificate Statements. The retrieved information is transformed to the JAXB object.<br>
 	 * Qualified Certificate Statements, the following Policies are checked:<br>
-	 * - Qualified Certificates Policy "0.4.0.1456.1.1�? (QCP);<br>
+	 * - Qualified Certificates Policy "0.4.0.1456.1.1â€� (QCP);<br>
 	 * - Qualified Certificates Policy "0.4.0.1456.1.2" (QCP+);<br>
 	 * - Qualified Certificates Compliance "0.4.0.1862.1.1";<br>
 	 * - Qualified Certificates SCCD "0.4.0.1862.1.4";<br>
@@ -1139,7 +1143,7 @@ public abstract class SignedDocumentValidator implements DocumentValidator {
 			xmlPolicy.setStatus(false);
 			xmlPolicy.setProcessingError(e.getMessage());
 			//Do nothing
-			//LOG.warn(e.getMessage());// PFB: Modificado para eliminar nivel de log LOG.warn(e.getMessage(),e);
+			LOG.warn(e.getMessage(), e);
 			return;
 		}
 

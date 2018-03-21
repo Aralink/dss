@@ -191,7 +191,12 @@ public class ControlTimeSliding {
 						LOG.warn("The status of the service is unknown: (serviceName: " + serviceName + ")");
 					} else {
 
+						//@@PFB: Este servicio casca al validar firmas con certificados caducados cuando la TSL no tiene fecha de fin
+						//y hace que falle la validación PSV.
+						//Se debe corregir el servicio para que que no falle y devolver o bien una fecha en el futuro o un nulo y chequear el error
 						final Date statusEndDate = InvolvedServiceInfo.getEndDate(certificate);
+						//final Date statusEndDate = null;
+						//final Date statusEndDate = new Date();
 						controlTime = statusEndDate;
 						addControlTime(constraintNode);
 					}

@@ -27,7 +27,6 @@ import java.util.List;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.cms.CMSObjectIdentifiers;
@@ -50,14 +49,11 @@ import eu.europa.esig.dss.x509.ocsp.OfflineOCSPSource;
 /**
  * OCSPSource that retrieves information from a CAdESSignature.
  *
- *  PFB:Modificado método addBasicOcspRespFrom_id_pkix_ocsp_basic para evitar un problema con la verificación de firmas
- *  CAdES según indicaciones del equipo de DSS https://esig-dss.atlassian.net/browse/DSS-729 
+ *
  */
 
-@SuppressWarnings("serial")
 public class CAdESOCSPSource extends OfflineOCSPSource {
 
-	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(CAdESOCSPSource.class);
 
 	private CMSSignedData cmsSignedData;
@@ -128,7 +124,7 @@ public class CAdESOCSPSource extends OfflineOCSPSource {
           In the PKCS #7 object of a digital signature in a PDF file, identifies a signed attribute
           that "can include all the revocation information that is necessary to carry out revocation
           checks for the signer's certificate and its issuer certificates."
-          Defined as adbe-revocationInfoArchival { adbe(1.2.840.113583) acrobat(1) security(1) 8 } in "PDF Reference, fifth edition: Adobe® Portable Document Format, Version 1.6" Adobe Systems Incorporated, 2004.
+          Defined as adbe-revocationInfoArchival { adbe(1.2.840.113583) acrobat(1) security(1) 8 } in "PDF Reference, fifth edition: AdobeÂ® Portable Document Format, Version 1.6" Adobe Systems Incorporated, 2004.
           http://partners.adobe.com/public/developer/en/pdf/PDFReference16.pdf page 698
 
           RevocationInfoArchival ::= SEQUENCE {
@@ -144,7 +140,6 @@ public class CAdESOCSPSource extends OfflineOCSPSource {
 		return basicOCSPResps;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void addBasicOcspRespFrom_id_ri_ocsp_response(final List<BasicOCSPResp> basicOCSPResps) {
 
 		final Store otherRevocationInfo = cmsSignedData.getOtherRevocationInfo(CMSObjectIdentifiers.id_ri_ocsp_response);
@@ -164,22 +159,16 @@ public class CAdESOCSPSource extends OfflineOCSPSource {
 			addBasicOcspResp(basicOCSPResps, basicOCSPResp);
 		}
 	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+
 	private void addBasicOcspRespFrom_id_pkix_ocsp_basic(final List<BasicOCSPResp> basicOCSPResps) {
+
 		final Store otherRevocationInfo = cmsSignedData.getOtherRevocationInfo(OCSPObjectIdentifiers.id_pkix_ocsp_basic);
 		final Collection otherRevocationInfoMatches = otherRevocationInfo.getMatches(null);
 		for (final Object object : otherRevocationInfoMatches) {
-			if (object instanceof DERSequence){
-				final DERSequence otherRevocationInfoMatch = (DERSequence) object;
-				final BasicOCSPResp basicOCSPResp = DSSASN1Utils.getBasicOcspResp(otherRevocationInfoMatch);
-				addBasicOcspResp(basicOCSPResps, basicOCSPResp);
-			} else {
-				//PFB:Añadido comprobación de tipado porque cascaba en firmas múltiples
-				final DLSequence d = (DLSequence)object;
-				DERSequence otherRevocationInfoMatch = new DERSequence(d);
-				final BasicOCSPResp basicOCSPResp = DSSASN1Utils.getBasicOcspResp(otherRevocationInfoMatch);
-				addBasicOcspResp(basicOCSPResps, basicOCSPResp);
-			}
+
+			final DERSequence otherRevocationInfoMatch = (DERSequence) object;
+			final BasicOCSPResp basicOCSPResp = DSSASN1Utils.getBasicOcspResp(otherRevocationInfoMatch);
+			addBasicOcspResp(basicOCSPResps, basicOCSPResp);
 		}
 	}
 

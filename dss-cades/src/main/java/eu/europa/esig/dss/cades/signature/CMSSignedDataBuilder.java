@@ -247,7 +247,10 @@ public class CMSSignedDataBuilder {
 				IOUtils.closeQuietly(inputStream);
 				cmsSignedData = cmsSignedDataGenerator.generate(content, encapsulate);
 			} else {
-				cmsSignedData = cmsSignedDataGenerator.generate(cmsSignedData.getSignedContent(), encapsulate);
+				//@PFB cambiado porque en firmas DETACHED paralelas (dos firmantes) está incrustando el contenido
+				//cmsSignedData = cmsSignedDataGenerator.generate(cmsSignedData.getSignedContent(), encapsulate);
+				boolean isDetachedSignature =  parameters.getDetachedContent()!=null;
+				cmsSignedData = cmsSignedDataGenerator.generate(cmsSignedData.getSignedContent(), !isDetachedSignature);
 			}
 			return cmsSignedData;
 		} catch (CMSException e) {

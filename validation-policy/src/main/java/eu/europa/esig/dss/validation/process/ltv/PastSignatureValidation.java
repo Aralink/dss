@@ -217,7 +217,8 @@ public class PastSignatureValidation {
 				 * terminate with INVALID/NOT_YET_VALID.<br>
 				 */
 
-				final int signingCertId = getSigningCertificateId(signature);
+				//@@PFB: Signing
+				final String signingCertId = getSigningCertificateId(signature);
 				final XmlDom signingCert = params.getCertificate(signingCertId);
 				final Date notBefore = signingCert.getTimeValue("./NotBefore/text()");
 
@@ -299,9 +300,11 @@ public class PastSignatureValidation {
 	 * @param signature
 	 * @return
 	 */
-	private static int getSigningCertificateId(final XmlDom signature) {
+	private static String getSigningCertificateId(final XmlDom signature) {
 
-		final int signingCertId = signature.getIntValue("./SigningCertificate/@Id");
+		//@@pfb: Modificado de int a string
+		//final int signingCertId = signature.getIntValue("./SigningCertificate/@Id");
+		final String signingCertId = signature.getValue("./SigningCertificate/@Id");
 		return signingCertId;
 	}
 

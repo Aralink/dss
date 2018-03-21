@@ -240,6 +240,7 @@ public class TrustedListsCertificateSource extends CommonTrustedCertificateSourc
 		} catch (Exception e) {
 
 			IOUtils.closeQuietly(inputStream);
+			IOUtils.closeQuietly(inputStream);
 			throw new DSSException(e);
 		}
 	}
