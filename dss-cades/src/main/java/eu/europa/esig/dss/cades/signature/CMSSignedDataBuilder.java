@@ -36,6 +36,7 @@ import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.CMSException;
@@ -247,9 +248,11 @@ public class CMSSignedDataBuilder {
 				IOUtils.closeQuietly(inputStream);
 				cmsSignedData = cmsSignedDataGenerator.generate(content, encapsulate);
 			} else {
-				//@PFB cambiado porque en firmas DETACHED paralelas (dos firmantes) está incrustando el contenido
-				//cmsSignedData = cmsSignedDataGenerator.generate(cmsSignedData.getSignedContent(), encapsulate);
-				boolean isDetachedSignature =  parameters.getDetachedContent()!=null;
+				//@PFB FIXED for signatures with two signers.
+				//if the signature is detached (signedData.encapContentInfo.content == null) we shouldn't embed the detached content into the new cmsSignedData
+				SignedData signedData =	(SignedData) cmsSignedData.toASN1Structure().getContent();
+				boolean isDetachedSignature = signedData.getEncapContentInfo().getContent() == null;
+				
 				cmsSignedData = cmsSignedDataGenerator.generate(cmsSignedData.getSignedContent(), !isDetachedSignature);
 			}
 			return cmsSignedData;
@@ -260,3 +263,4 @@ public class CMSSignedDataBuilder {
 
 	//TODO Vincent: regeneration of SignedData -> Content-TS
 }
+
