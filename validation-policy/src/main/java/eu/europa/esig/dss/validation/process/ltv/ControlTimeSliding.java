@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
+import eu.europa.esig.dss.DSSException;
 import eu.europa.esig.dss.DSSUtils;
 import eu.europa.esig.dss.XmlDom;
 import eu.europa.esig.dss.validation.policy.ProcessParameters;
@@ -194,10 +195,15 @@ public class ControlTimeSliding {
 						//@@PFB: Este servicio casca al validar firmas con certificados caducados cuando la TSL no tiene fecha de fin
 						//y hace que falle la validación PSV.
 						//Se debe corregir el servicio para que que no falle y devolver o bien una fecha en el futuro o un nulo y chequear el error
-						final Date statusEndDate = InvolvedServiceInfo.getEndDate(certificate);
-						//final Date statusEndDate = null;
-						//final Date statusEndDate = new Date();
-						controlTime = statusEndDate;
+						//Capturada la excepción cuando no se puede recuperar la fecha de fin 
+						try{
+							final Date statusEndDate = InvolvedServiceInfo.getEndDate(certificate);
+							controlTime = statusEndDate;
+						}catch (DSSException e){
+							LOG.warn("No se ha podido recuperar la statusEndDate de la TSL. Aplicando fecha a día de hoy");
+							controlTime = new Date();
+						}	
+						
 						addControlTime(constraintNode);
 					}
 				}
