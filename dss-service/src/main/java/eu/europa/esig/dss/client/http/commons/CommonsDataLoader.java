@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.naming.Context;
 import javax.naming.directory.Attribute;
@@ -100,6 +102,8 @@ public class CommonsDataLoader implements DataLoader, DSSNotifier {
 	public static final int TIMEOUT_CONNECTION = 6000;
 
 	public static final int TIMEOUT_SOCKET = 6000;
+	
+	public static final int HARD_TIMEOUT = 0;
 
 	public static final int CONNECTIONS_MAX_TOTAL = 20;
 
@@ -117,6 +121,7 @@ public class CommonsDataLoader implements DataLoader, DSSNotifier {
 
 	private int timeoutConnection = TIMEOUT_CONNECTION;
 	private int timeoutSocket = TIMEOUT_SOCKET;
+	private int hardTimeout = HARD_TIMEOUT;
 	private int connectionsMaxTotal = CONNECTIONS_MAX_TOTAL;
 	private int connectionsMaxPerRoute = CONNECTIONS_MAX_PER_ROUTE;
 
@@ -195,6 +200,7 @@ public class CommonsDataLoader implements DataLoader, DSSNotifier {
 		final RequestConfig.Builder custom = RequestConfig.custom();
 		custom.setSocketTimeout(timeoutSocket);
 		custom.setConnectionRequestTimeout(timeoutConnection);
+		
 		final RequestConfig requestConfig = custom.build();
 		httpClientBuilder = httpClientBuilder.setDefaultRequestConfig(requestConfig);
 		httpClientBuilder.setConnectionManager(getConnectionManager());
@@ -223,6 +229,21 @@ public class CommonsDataLoader implements DataLoader, DSSNotifier {
 		httpClientBuilder = httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 		httpClientBuilder = configureProxy(httpClientBuilder, credentialsProvider, url);
 		return httpClientBuilder;
+	}
+	
+	private void configHardTimeout(final HttpUriRequest httpRequest){
+		if (hardTimeout > 0){
+			TimerTask task = new TimerTask() {
+				@Override
+				public void run() {
+					if (httpRequest != null) {
+						LOG.error("Timeout global de la conexión  "+httpRequest.getURI()+". Abortando...");
+						httpRequest.abort();
+					}
+				}
+			};
+			new Timer(true).schedule(task, hardTimeout);
+		}
 	}
 
 	/**
@@ -541,6 +562,9 @@ public class CommonsDataLoader implements DataLoader, DSSNotifier {
 		// Add AuthCache to the execution context
 		HttpClientContext localContext = HttpClientContext.create();
 		localContext.setAuthCache(authCache);
+		
+		//Timeout global de la conexión
+		configHardTimeout(httpRequest);
 
 		try {
 			final HttpResponse response = client.execute(targetHost, httpRequest, localContext);
@@ -662,6 +686,15 @@ public class CommonsDataLoader implements DataLoader, DSSNotifier {
 	public void setConnectionsMaxPerRoute(int connectionsMaxPerRoute) {
 		this.connectionsMaxPerRoute = connectionsMaxPerRoute;
 	}
+	
+	public int getHardTimeout() {
+		return hardTimeout;
+	}
+
+	public void setHardTimeout(int hardTimeout) {
+		this.hardTimeout = hardTimeout;
+	}
+
 
 	/**
 	 * @return the contentType
